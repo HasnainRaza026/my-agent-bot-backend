@@ -7,7 +7,14 @@ import uvicorn
 from me_worker import Me
 
 app = FastAPI()
-me = Me()  # loads files at startup
+me = None
+
+
+def get_me():
+    global me
+    if me is None:
+        me = Me()
+    return me
 
 # allow your Next.js dev server / deployed front-end
 origins = [
@@ -30,8 +37,10 @@ class ChatRequest(BaseModel):
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
     try:
-        reply = me.chat(req.message, req.history)
+        reply = get_me().chat(req.message, req.history)
         return {"reply": reply}
+    except ValueError as e:
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

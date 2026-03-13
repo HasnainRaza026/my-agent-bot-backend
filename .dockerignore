@@ -32,11 +32,6 @@ env/
 *.swp
 *.swo
 
-# Environment files (included separately via docker-compose)
-.env
-.env.local
-.env.*.local
-
 # Git
 .git/
 .gitignore

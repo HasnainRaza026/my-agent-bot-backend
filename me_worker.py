@@ -71,8 +71,13 @@ def truncate_text(text, max_chars=4000):
 
 class Me:
     def __init__(self):
+        api_key = os.getenv("GEMINI_API_KEY") or os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError(
+                "Missing API key. Set GEMINI_API_KEY (or OPENAI_API_KEY) in environment variables."
+            )
         self.gemini = OpenAI(
-            api_key=os.getenv("GEMINI_API_KEY"),
+            api_key=api_key,
             base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
         )
         self.name = os.getenv("ME_NAME", "Me")
