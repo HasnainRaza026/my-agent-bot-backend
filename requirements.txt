@@ -1,5 +1,8 @@
 fastapi
+uvicorn
+gunicorn
 python-dotenv
 openai
 pypdf
 requests
+pydantic
