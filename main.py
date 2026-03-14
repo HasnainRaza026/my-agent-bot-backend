@@ -1,11 +1,15 @@
 # backend/main.py
 import os
+import logging
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
 from me_worker import Me
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("backend.cors")
 
 app = FastAPI()
 me = None
@@ -24,13 +28,34 @@ origins = [
 ]
 origins = [origin.strip() for origin in origins if origin and origin.strip()]
 
+logger.info("Allowed origins: %s", origins)
+
 
 # Middleware to enforce origin restriction on API routes
 @app.middleware("http")
 async def enforce_origin_restriction(request: Request, call_next):
     origin = request.headers.get("origin")
+    client_ip = request.client.host if request.client else "unknown"
+
+    if request.url.path.startswith("/api/"):
+        logger.info(
+            "Incoming request path=%s method=%s origin=%s client_ip=%s",
+            request.url.path,
+            request.method,
+            origin,
+            client_ip,
+        )
+
     if request.url.path.startswith("/api/"):
         if not origin or origin not in origins:
+            logger.warning(
+                "Blocked request path=%s method=%s origin=%s client_ip=%s allowed_origins=%s",
+                request.url.path,
+                request.method,
+                origin,
+                client_ip,
+                origins,
+            )
             return JSONResponse(status_code=403, content={"detail": "Origin not allowed"})
     return await call_next(request)
 
