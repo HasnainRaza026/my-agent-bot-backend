@@ -47,7 +47,7 @@ async def enforce_origin_restriction(request: Request, call_next):
         )
 
     if request.url.path.startswith("/api/"):
-        if not origin or origin not in origins:
+        if origin and origin not in origins:
             logger.warning(
                 "Blocked request path=%s method=%s origin=%s client_ip=%s allowed_origins=%s",
                 request.url.path,
