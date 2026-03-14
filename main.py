@@ -1,8 +1,9 @@
 # backend/main.py
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import uvicorn
 from me_worker import Me
 
@@ -16,11 +17,24 @@ def get_me():
         me = Me()
     return me
 
-# allow your Next.js dev server / deployed front-end
+# allow only explicitly configured front-end origins
 origins = [
     # os.getenv("CLIENT_ORIGIN_DEVELOPMENT"),
-    os.getenv("CLIENT_ORIGIN_PRODUCTION"),  
+    os.getenv("CLIENT_ORIGIN_PRODUCTION"),
 ]
+origins = [origin.strip() for origin in origins if origin and origin.strip()]
+
+
+# Middleware to enforce origin restriction on API routes
+@app.middleware("http")
+async def enforce_origin_restriction(request: Request, call_next):
+    origin = request.headers.get("origin")
+    if request.url.path.startswith("/api/"):
+        if not origin or origin not in origins:
+            return JSONResponse(status_code=403, content={"detail": "Origin not allowed"})
+    return await call_next(request)
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
