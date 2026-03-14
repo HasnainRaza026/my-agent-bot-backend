@@ -18,7 +18,7 @@ def get_me():
 
 # allow your Next.js dev server / deployed front-end
 origins = [
-    os.getenv("CLIENT_ORIGIN_DEVELOPMENT"),
+    # os.getenv("CLIENT_ORIGIN_DEVELOPMENT"),
     os.getenv("CLIENT_ORIGIN_PRODUCTION"),  
 ]
 app.add_middleware(
